@@ -2,6 +2,8 @@
 
 maimai-diff-predictor 项目旨在通过通用的基于 simai 语法的 majdata.txt 谱面文件，使用经过训练的 lstm 模型进行分析得到推测的谱面定数。
 
+一个在 web 上运行的该项目可见 [https://right-sg.icu/mdp-web](https://right-sg.icu/mdp-web)。
+
 当前版本的项目于 2024/8/24 上传，模型完成于 2024/8/17。目前先开源了模型文件和推理模块，在进一步完善后训练模块也会一同放出。
 
 `inference` 目录下存放了模型的推理模块，可以使用相应程序和模型完成定数推测。
