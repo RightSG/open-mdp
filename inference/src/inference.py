@@ -2,6 +2,14 @@ import torch
 import torch.nn as nn
 import json
 
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print('找到 %d 个可用的 GPU.' % torch.cuda.device_count())
+    print('将会使用这些 GPU 推理:', torch.cuda.get_device_name(0))
+else:
+    print('没有可用的GPU, 将使用 CPU 推理.')
+    device = torch.device("cpu")
+
 # 定义 NoteType 和 TouchArea 的映射
 note_type_mapping = {"Tap": 0, "Slide": 1, "Hold": 2, "Touch": 3, "TouchHold": 4}
 touch_area_mapping = {" ": 0, "A": 1, "B": 2, "C": 3, "D": 4, "E": 5}
@@ -79,11 +87,11 @@ model = LSTMModelWithAttention(
     output_size,
     special_indices,
     special_weight=10.0,
-).cuda()
+).to(device)
 
 # 加载训练好的模型
 best_model_path = "trained_models/lstm_model.pth"
-model.load_state_dict(torch.load(best_model_path))
+model.load_state_dict(torch.load(best_model_path, map_location=device))
 model.eval()
 
 
@@ -115,7 +123,7 @@ def process_json(json_file_path):
                     note["displacement"],
                 ]
                 notes_sequence.append(note_features)
-        return torch.tensor(notes_sequence, dtype=torch.float32).unsqueeze(0).cuda()
+        return torch.tensor(notes_sequence, dtype=torch.float32).unsqueeze(0).to(device)
 
 
 # 预测函数
@@ -124,6 +132,3 @@ def predict_difficulty(json_file_path):
     with torch.no_grad():
         output, _ = model(input_data)
     return json_file_path, output.item()
-
-
-
