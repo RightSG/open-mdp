@@ -30,6 +30,8 @@ open-mdp 或称 maimai-diff-predictor
 
 ~~把大象装进冰箱需要几步？~~
 
+**请复制谱面文件，请勿直接在原谱面上运行预处理**
+
 1. 进入 `serializer\` 目录，运行 `SimaiSerializerFromMajdataEdit.exe <谱面文件路径> <谱面等级(1-6)>`
 2. 移动 `serializer\temps\` 下的 json 文件到 `inference\`， 重命名为 `pre-rawchart.json`
 3. 进入 `inference\` 目录，运行 `python main.py`
