@@ -30,6 +30,12 @@ namespace MajdataEdit
             string outputFileName = $"pre-rawchart-{Guid.NewGuid()}.json";
             string outputFilePath = Path.Combine(tempsDirectory, outputFileName);
 
+            // 检查临时目录是否存在
+            if (!Directory.Exists(tempsDirectory))
+            {
+                Directory.CreateDirectory(tempsDirectory);
+            }
+
             // 检查文件是否存在
             if (!File.Exists(filePath))
             {
