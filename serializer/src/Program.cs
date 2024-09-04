@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
 using System.Text.Json;
-using System.Collections.Generic;
 
 namespace MajdataEdit
 {
@@ -9,38 +6,16 @@ namespace MajdataEdit
     {
         static void Main(string[] args)
         {
-            // 检查是否提供了文件绝对路径和 level_index 参数
-            if (args.Length < 2)
-            {
-                Console.WriteLine("请提供要处理的文件绝对路径和 level_index 作为参数。");
-                Environment.Exit(1); // 返回码 1 表示未提供足够的参数
-            }
-
-            // 获取文件绝对路径和 level_index
-            string filePath = args[0];
-            if (!int.TryParse(args[1], out int selectedLevel) || selectedLevel < 1 || selectedLevel > 6)
-            {
-                Console.WriteLine("无效的 level_index 参数。");
-                Environment.Exit(2); // 返回码 2 表示无效的 level_index 参数
-            }
-
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string tempsDirectory = Path.Combine(baseDirectory, "temps");
-
-            string outputFileName = $"pre-rawchart-{Guid.NewGuid()}.json";
-            string outputFilePath = Path.Combine(tempsDirectory, outputFileName);
-
-            // 检查临时目录是否存在
-            if (!Directory.Exists(tempsDirectory))
-            {
-                Directory.CreateDirectory(tempsDirectory);
-            }
+            // 设置文件路径
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "maidata.txt");
+            string outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), "pre-rawchart.json");
 
             // 检查文件是否存在
             if (!File.Exists(filePath))
             {
-                Console.WriteLine("未找到指定的文件。");
-                Environment.Exit(3); // 返回码 3 表示文件未找到
+                Console.WriteLine("未找到 maidata.txt 文件。");
+                Pause();
+                return;
             }
 
             // 清空之前的 fumen 数据
@@ -51,15 +26,40 @@ namespace MajdataEdit
 
             if (!success)
             {
-                Console.WriteLine("读取文件失败。");
-                Environment.Exit(4); // 返回码 4 表示读取文件失败
+                Console.WriteLine("读取 maidata.txt 文件失败。");
+                Pause();
+                return;
             }
 
-            // 检查选定的 level_index 是否有效
-            if (SimaiProcess.fumens.Length <= selectedLevel || string.IsNullOrEmpty(SimaiProcess.fumens[selectedLevel]))
+            // 列出所有可用的 level_index
+            List<int> availableLevels = new List<int>();
+            for (int level_index = 1; level_index <= 5; level_index++)
+            {
+                if (SimaiProcess.fumens.Length > level_index && !string.IsNullOrEmpty(SimaiProcess.fumens[level_index]))
+                {
+                    availableLevels.Add(level_index);
+                }
+            }
+
+            if (availableLevels.Count == 0)
+            {
+                Console.WriteLine("未找到任何可用的 level_index。");
+                Pause();
+                return;
+            }
+
+            Console.WriteLine("可用的 level_index:");
+            foreach (var level in availableLevels)
+            {
+                Console.WriteLine(level);
+            }
+
+            Console.Write("请选择要加载的 level_index: ");
+            if (!int.TryParse(Console.ReadLine(), out int selectedLevel) || !availableLevels.Contains(selectedLevel))
             {
                 Console.WriteLine("无效的 level_index 选择。");
-                Environment.Exit(5); // 返回码 5 表示无效的 level_index 选择
+                Pause();
+                return;
             }
 
             // 处理选定的 level_index
@@ -112,20 +112,8 @@ namespace MajdataEdit
             string jsonString = JsonSerializer.Serialize(jsonOutput, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(outputFilePath, jsonString);
 
-            // 删除处理成功的 .txt 文件
-            try
-            {
-                File.Delete(filePath);
-                Console.WriteLine($"成功删除文件: {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"删除文件失败: {ex.Message}");
-            }
-
             Console.WriteLine($"成功加载 level_index {selectedLevel} 并保存到 {outputFilePath}");
-            Console.WriteLine(outputFileName); // 输出文件名
-            Environment.Exit(0); // 返回码 0 表示成功
+            Pause();
         }
 
         static void ClearFumens()
@@ -133,8 +121,14 @@ namespace MajdataEdit
             // 清空 SimaiProcess.fumens 数组
             for (int i = 0; i < SimaiProcess.fumens.Length; i++)
             {
-                SimaiProcess.fumens[i] = string.Empty;
+                SimaiProcess.fumens[i] = null;
             }
+        }
+
+        static void Pause()
+        {
+            Console.WriteLine("按任意键继续...");
+            Console.ReadLine();
         }
     }
 }
