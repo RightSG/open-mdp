@@ -6,8 +6,6 @@ _✨ 娱乐性maimai谱面定数预测 ✨_
 
 </div>
 
-快速尝试 > [https://right-sg.icu/mdp-web](https://right-sg.icu/mdp-web)
-
 # 简介
 
 open-mdp 或称 maimai-diff-predictor
